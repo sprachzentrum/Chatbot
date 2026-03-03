@@ -1,0 +1,18 @@
+services:
+  chatbot:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data:/app/data
+      - whatsapp_auth:/app/.wwebjs_auth
+    environment:
+      - PORT=3000
+      - SESSION_SECRET=ihr-geheimes-passwort-hier
+      - ADMIN_USER=admin
+      - ADMIN_PASS=admin123
+      - BOT_NAME=Sprachzentrum Bot
+    restart: unless-stopped
+
+volumes:
+  whatsapp_auth:

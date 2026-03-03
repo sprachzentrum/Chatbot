@@ -8,6 +8,7 @@ const { createClient } = require('./whatsapp/client');
 const { setupMessageHandler } = require('./whatsapp/handler');
 const { ensureAdminExists, requireAuth } = require('./admin/auth');
 const adminRoutes = require('./admin/routes');
+const exerciseRoutes = require('./exercises/routes');
 
 async function start() {
   console.log('=== Sprachzentrum WhatsApp Chatbot ===');
@@ -37,12 +38,17 @@ async function start() {
   // Admin-Routen (enthält eigene Auth-Prüfung für /api/login)
   app.use(adminRoutes);
 
+  // Übungsgenerator-Routen & statische Dateien
+  app.use(exerciseRoutes);
+  app.use('/exercises', express.static(path.join(__dirname, 'public', 'exercises')));
+
   // Geschützter Bereich
   app.use(requireAuth);
   app.use(express.static(path.join(__dirname, 'public')));
 
   app.listen(config.port, () => {
     console.log(`[Server] Admin-Panel läuft auf http://localhost:${config.port}`);
+    console.log(`[Server] Übungsgenerator: http://localhost:${config.port}/exercises/`);
   });
 
   // WhatsApp-Client starten

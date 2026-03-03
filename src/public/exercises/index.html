@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Übungsgenerator - Sprachzentrum</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f5f7fa;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      color: white;
+      padding: 1.5rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header h1 { font-size: 1.5rem; font-weight: 600; }
+    .header a { color: rgba(255,255,255,.8); text-decoration: none; font-size: .9rem; }
+    .header a:hover { color: white; }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .tabs {
+      display: flex;
+      gap: .5rem;
+      margin-bottom: 2rem;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 0;
+    }
+
+    .tab {
+      padding: .75rem 1.5rem;
+      border: none;
+      background: none;
+      color: #64748b;
+      font-size: .95rem;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      transition: all .2s;
+    }
+
+    .tab:hover { color: #2563eb; }
+    .tab.active {
+      color: #2563eb;
+      border-bottom-color: #2563eb;
+      font-weight: 600;
+    }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,.1);
+    }
+
+    .card h2 {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      color: #1e293b;
+    }
+
+    .card h3 {
+      font-size: 1rem;
+      margin: 1rem 0 .5rem;
+      color: #475569;
+    }
+
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
+
+    .type-card {
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 1.25rem;
+      cursor: pointer;
+      transition: all .2s;
+    }
+
+    .type-card:hover {
+      border-color: #2563eb;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(37,99,235,.15);
+    }
+
+    .type-card.selected {
+      border-color: #2563eb;
+      background: #eff6ff;
+    }
+
+    .type-card h3 { margin: 0 0 .5rem; font-size: 1rem; color: #1e293b; }
+    .type-card p { font-size: .85rem; color: #64748b; margin: 0; }
+    .type-card .h5p-tag {
+      display: inline-block;
+      background: #f1f5f9;
+      color: #475569;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: .75rem;
+      margin-top: .5rem;
+      font-family: monospace;
+    }
+
+    .form-group { margin-bottom: 1.25rem; }
+    .form-group label {
+      display: block;
+      font-weight: 500;
+      margin-bottom: .4rem;
+      color: #374151;
+      font-size: .9rem;
+    }
+
+    input[type="text"], input[type="number"], textarea, select {
+      width: 100%;
+      padding: .6rem .8rem;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: .9rem;
+      font-family: inherit;
+      transition: border-color .2s;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37,99,235,.1);
+    }
+
+    textarea { min-height: 100px; resize: vertical; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      padding: .6rem 1.25rem;
+      border: none;
+      border-radius: 8px;
+      font-size: .9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .2s;
+    }
+
+    .btn-primary { background: #2563eb; color: white; }
+    .btn-primary:hover { background: #1d4ed8; }
+    .btn-secondary { background: #f1f5f9; color: #475569; }
+    .btn-secondary:hover { background: #e2e8f0; }
+    .btn-success { background: #059669; color: white; }
+    .btn-success:hover { background: #047857; }
+    .btn-danger { background: #dc2626; color: white; }
+    .btn-danger:hover { background: #b91c1c; }
+
+    .btn-group { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: 1rem; }
+
+    .level-selector {
+      display: flex;
+      gap: .5rem;
+      flex-wrap: wrap;
+    }
+
+    .level-btn {
+      padding: .5rem 1rem;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all .2s;
+    }
+
+    .level-btn:hover { border-color: #2563eb; }
+    .level-btn.active {
+      background: #2563eb;
+      color: white;
+      border-color: #2563eb;
+    }
+
+    .level-btn.a1 { --color: #22c55e; }
+    .level-btn.a2 { --color: #84cc16; }
+    .level-btn.b1 { --color: #eab308; }
+    .level-btn.b2 { --color: #f97316; }
+    .level-btn.c1 { --color: #ef4444; }
+
+    .level-btn.active.a1 { background: #22c55e; border-color: #22c55e; }
+    .level-btn.active.a2 { background: #84cc16; border-color: #84cc16; }
+    .level-btn.active.b1 { background: #eab308; border-color: #eab308; }
+    .level-btn.active.b2 { background: #f97316; border-color: #f97316; }
+    .level-btn.active.c1 { background: #ef4444; border-color: #ef4444; }
+
+    .answer-row {
+      display: flex;
+      gap: .5rem;
+      align-items: center;
+      margin-bottom: .5rem;
+    }
+
+    .answer-row input[type="text"] { flex: 1; }
+    .answer-row input[type="checkbox"] { width: 20px; height: 20px; }
+    .answer-row button { flex-shrink: 0; }
+
+    .output-area {
+      background: #1e293b;
+      color: #e2e8f0;
+      border-radius: 10px;
+      padding: 1.25rem;
+      overflow-x: auto;
+      font-family: 'Fira Code', 'Consolas', monospace;
+      font-size: .85rem;
+      line-height: 1.5;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+
+    .output-area pre { margin: 0; white-space: pre-wrap; word-break: break-word; }
+
+    .preview-area {
+      border: 2px dashed #d1d5db;
+      border-radius: 10px;
+      padding: 1.5rem;
+      min-height: 200px;
+    }
+
+    .oesd-module {
+      border-left: 4px solid #2563eb;
+      padding-left: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .oesd-part {
+      background: #f8fafc;
+      border-radius: 8px;
+      padding: 1rem;
+      margin: .5rem 0;
+    }
+
+    .oesd-part .part-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: .75rem;
+      font-weight: 600;
+    }
+
+    .badge-blue { background: #dbeafe; color: #1d4ed8; }
+    .badge-green { background: #dcfce7; color: #166534; }
+    .badge-orange { background: #fed7aa; color: #9a3412; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+
+    .exam-summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+
+    .exam-stat {
+      text-align: center;
+      padding: 1rem;
+      background: #f8fafc;
+      border-radius: 8px;
+    }
+
+    .exam-stat .value { font-size: 1.5rem; font-weight: 700; color: #2563eb; }
+    .exam-stat .label { font-size: .8rem; color: #64748b; }
+
+    .example-card {
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 1rem;
+      cursor: pointer;
+      transition: all .2s;
+    }
+
+    .example-card:hover {
+      border-color: #2563eb;
+      background: #f8fafc;
+    }
+
+    .example-card .type { font-size: .75rem; color: #64748b; text-transform: uppercase; }
+    .example-card .preview { font-size: .85rem; color: #374151; margin-top: .25rem; }
+
+    .alert {
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      font-size: .9rem;
+    }
+
+    .alert-info { background: #dbeafe; color: #1e40af; }
+    .alert-success { background: #dcfce7; color: #166534; }
+    .alert-error { background: #fef2f2; color: #991b1b; }
+
+    .hidden { display: none; }
+
+    @media (max-width: 768px) {
+      .container { padding: 1rem; }
+      .grid { grid-template-columns: 1fr; }
+      .tabs { overflow-x: auto; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Sprachzentrum Übungsgenerator</h1>
+    <a href="/">Zurück zum Admin-Panel</a>
+  </div>
+
+  <div class="container">
+    <div class="tabs">
+      <button class="tab active" data-tab="generator">Übung erstellen</button>
+      <button class="tab" data-tab="oesd">ÖSD Prüfung</button>
+      <button class="tab" data-tab="examples">Beispiele</button>
+      <button class="tab" data-tab="export">H5P Export</button>
+    </div>
+
+    <!-- TAB: Übung erstellen -->
+    <div id="tab-generator" class="tab-content active">
+      <div class="card">
+        <h2>Übungstyp wählen</h2>
+        <div id="exercise-types" class="grid"></div>
+      </div>
+
+      <div id="exercise-form" class="card hidden">
+        <h2 id="form-title">Übung konfigurieren</h2>
+
+        <div class="form-group">
+          <label>Sprachniveau</label>
+          <div class="level-selector">
+            <button class="level-btn a1" data-level="A1">A1</button>
+            <button class="level-btn a2" data-level="A2">A2</button>
+            <button class="level-btn b1 active" data-level="B1">B1</button>
+            <button class="level-btn b2" data-level="B2">B2</button>
+            <button class="level-btn c1" data-level="C1">C1</button>
+          </div>
+        </div>
+
+        <!-- Dynamic form fields inserted here -->
+        <div id="dynamic-fields"></div>
+
+        <div class="btn-group">
+          <button class="btn btn-primary" id="btn-generate">Übung generieren</button>
+          <button class="btn btn-success" id="btn-export-h5p">Als H5P exportieren</button>
+          <button class="btn btn-secondary" id="btn-preview">Vorschau</button>
+        </div>
+      </div>
+
+      <div id="result-area" class="card hidden">
+        <h2>Ergebnis</h2>
+        <div id="result-alert"></div>
+        <div id="result-preview" class="preview-area hidden"></div>
+        <div id="result-json" class="output-area hidden"><pre></pre></div>
+        <div class="btn-group">
+          <button class="btn btn-secondary" id="btn-copy-json">JSON kopieren</button>
+          <button class="btn btn-success" id="btn-download-h5p">H5P JSON herunterladen</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: ÖSD Prüfung -->
+    <div id="tab-oesd" class="tab-content">
+      <div class="card">
+        <h2>ÖSD Prüfungssimulation erstellen</h2>
+        <p style="color:#64748b;margin-bottom:1rem">Erstellen Sie eine vollständige Prüfungssimulation nach dem ÖSD-Format.</p>
+
+        <div class="form-group">
+          <label>Prüfungsniveau</label>
+          <div class="level-selector">
+            <button class="level-btn a1" data-oesd-level="A1">A1</button>
+            <button class="level-btn a2" data-oesd-level="A2">A2</button>
+            <button class="level-btn b1" data-oesd-level="B1">B1</button>
+            <button class="level-btn b2" data-oesd-level="B2">B2</button>
+            <button class="level-btn c1" data-oesd-level="C1">C1</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Thema (optional)</label>
+          <input type="text" id="oesd-topic" placeholder="z.B. Umwelt und Nachhaltigkeit">
+        </div>
+
+        <div class="btn-group">
+          <button class="btn btn-primary" id="btn-show-structure">Prüfungsstruktur anzeigen</button>
+          <button class="btn btn-success" id="btn-generate-oesd">Prüfung generieren</button>
+        </div>
+      </div>
+
+      <div id="oesd-structure" class="card hidden">
+        <h2 id="oesd-title"></h2>
+        <div id="oesd-summary" class="exam-summary"></div>
+        <div id="oesd-modules"></div>
+      </div>
+
+      <div id="oesd-result" class="card hidden">
+        <h2>Generierte Prüfung</h2>
+        <div id="oesd-result-json" class="output-area"><pre></pre></div>
+        <div class="btn-group">
+          <button class="btn btn-secondary" id="btn-copy-oesd">JSON kopieren</button>
+          <button class="btn btn-success" id="btn-download-oesd">Prüfung herunterladen</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: Beispiele -->
+    <div id="tab-examples" class="tab-content">
+      <div class="card">
+        <h2>Beispielübungen</h2>
+        <p style="color:#64748b;margin-bottom:1rem">Klicken Sie auf ein Beispiel, um es zu generieren und als H5P zu exportieren.</p>
+
+        <div class="form-group">
+          <label>Nach Niveau filtern</label>
+          <div class="level-selector">
+            <button class="level-btn active" data-example-level="all">Alle</button>
+            <button class="level-btn a1" data-example-level="A1">A1</button>
+            <button class="level-btn a2" data-example-level="A2">A2</button>
+            <button class="level-btn b1" data-example-level="B1">B1</button>
+            <button class="level-btn b2" data-example-level="B2">B2</button>
+            <button class="level-btn c1" data-example-level="C1">C1</button>
+          </div>
+        </div>
+
+        <div id="examples-grid" class="grid"></div>
+      </div>
+
+      <div id="example-result" class="card hidden">
+        <h2>Generiertes Beispiel</h2>
+        <div id="example-preview" class="preview-area"></div>
+        <div id="example-json" class="output-area" style="margin-top:1rem"><pre></pre></div>
+      </div>
+    </div>
+
+    <!-- TAB: H5P Export -->
+    <div id="tab-export" class="tab-content">
+      <div class="card">
+        <h2>H5P Export</h2>
+        <p style="color:#64748b;margin-bottom:1rem">Fügen Sie eine Übung im JSON-Format ein, um sie als H5P zu exportieren.</p>
+
+        <div class="form-group">
+          <label>Übungs-JSON eingeben</label>
+          <textarea id="export-json-input" rows="12" placeholder='{"type": "multipleChoice", "params": { ... }}'></textarea>
+        </div>
+
+        <div class="btn-group">
+          <button class="btn btn-success" id="btn-export-json">Als H5P exportieren</button>
+        </div>
+      </div>
+
+      <div id="export-result" class="card hidden">
+        <h2>H5P Export</h2>
+
+        <h3>content.json</h3>
+        <div id="export-content-json" class="output-area"><pre></pre></div>
+
+        <h3 style="margin-top:1rem">h5p.json (Manifest)</h3>
+        <div id="export-manifest-json" class="output-area"><pre></pre></div>
+
+        <div class="btn-group">
+          <button class="btn btn-secondary" id="btn-copy-export">content.json kopieren</button>
+          <button class="btn btn-success" id="btn-download-export">Alles herunterladen</button>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:1.5rem">
+        <h2>Verwendung der H5P-Dateien</h2>
+        <div class="alert alert-info">
+          <strong>So verwenden Sie den Export:</strong>
+          <ol style="margin-top:.5rem;padding-left:1.25rem">
+            <li>Laden Sie die generierte <code>content.json</code> herunter</li>
+            <li>Erstellen Sie einen Ordner <code>content/</code> und legen Sie die Datei dort ab</li>
+            <li>Laden Sie die <code>h5p.json</code> Manifest-Datei herunter</li>
+            <li>Laden Sie die benötigten H5P-Bibliotheken von <a href="https://h5p.org" target="_blank">h5p.org</a> herunter</li>
+            <li>Packen Sie alles als ZIP-Datei und benennen Sie sie in <code>.h5p</code> um</li>
+            <li>Laden Sie die <code>.h5p</code>-Datei in Ihre Lernplattform (Moodle, WordPress, etc.) hoch</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/exercises/app.js"></script>
+</body>
+</html>
